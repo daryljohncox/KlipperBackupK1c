@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { RegisterServiceWorker } from "@/components/RegisterServiceWorker";
 import { SearchBox } from "@/components/SearchBox";
 import { APP_NAME } from "@/lib/data";
 
@@ -8,12 +9,19 @@ export const metadata: Metadata = {
   title: `${APP_NAME}: compare 3D printing prices across NZ`,
   description:
     "Free price comparison for 3D printers, filament, resin and parts across New Zealand shops.",
+  applicationName: APP_NAME,
+  appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f7a4a",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-NZ">
       <body className="min-h-screen antialiased">
+        <RegisterServiceWorker />
         <header className="sticky top-0 z-10 border-b border-line bg-surface">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
             <Link href="/" className="text-lg font-bold text-brand">
