@@ -50,8 +50,9 @@ test("parseSitemap handles CDATA", () => {
 });
 
 test("parseProductPage can read a visible price", () => {
-  const html = `<title>Bambu PLA Basic 1kg</title><ul><li>Availability: Out Of Stock</li></ul>
-    <p class="price">  <span class="price-new">$2,085.00</span> <span class="price-old">$2,599.00</span></p>`;
+  const html = `<title>paint, tools</title><p class="price"><span class="price-new">$74.50</span></p>
+    <h1>Bambu PLA Basic 1kg</h1><ul><li>Availability: Out Of Stock</li></ul>
+    <ul><li><span style="text-decoration: line-through;">$2,599.00</span></li><li><h2>$2,085.00</h2></li></ul>`;
   assert.equal(parseProductPage(html), null);
   assert.deepEqual(parseProductPage(html, { htmlPrice: true }), { title: "Bambu PLA Basic 1kg", price: 2085, inStock: false, image: null });
 });

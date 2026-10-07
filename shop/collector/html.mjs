@@ -135,11 +135,17 @@ export function parseProductPage(html, { htmlPrice = false } = {}) {
   price ??= toPrice(meta(html, "product:price:amount") ?? meta(html, "og:price:amount") ?? meta(html, "price"));
   inStock ??= inStockText(meta(html, "product:availability") ?? meta(html, "og:availability") ?? meta(html, "availability")) ?? true;
   image ??= meta(html, "og:image");
-  if (htmlPrice) {
-    const m = html.match(/class=["'][^"']*\bprice(?:-new)?\b[^"']*["'][^>]*>\s*(?:<[^>]+>\s*)*\$\s?([\d,]+(?:\.\d{2})?)/i);
-    price ??= m ? toPrice(m[1]) : null;
-    const stock = html.match(/Availability:\s*(?:<[^>]+>\s*)*([^<]+)/i);
-    if (stock) inStock = inStockText(stock[1]);
+  if (htmlPrice && price === null) {
+    // OpenCart style: the main product's details follow "Availability:", and the
+    // current price is the heading after it (related products come elsewhere).
+    const at = html.search(/Availability:/i);
+    if (at >= 0) {
+      const after = html.slice(at, at + 3000);
+      const m = after.match(/<h2[^>]*>\s*\$\s?([\d,]+(?:\.\d{2})?)/i) ?? after.match(/\$\s?([\d,]+\.\d{2})/);
+      price = m ? toPrice(m[1]) : null;
+      inStock = inStockText(after.match(/Availability:\s*(?:<[^>]+>\s*)*([^<]+)/i)?.[1]) ?? inStock;
+    }
+    title = decode(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1].replace(/<[^>]+>/g, "") ?? "") || title;
   }
 
   if (!title || !price) return null;
