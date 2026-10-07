@@ -5,6 +5,15 @@ on:
     # 17:00 UTC = early morning in New Zealand.
     - cron: "0 17 * * *"
   workflow_dispatch:
+    inputs:
+      only:
+        description: "Test run: only these shop ids, comma separated (prices are not saved)"
+        required: false
+        default: ""
+      limit:
+        description: "Test run: read at most this many product pages per shop"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -16,6 +25,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    timeout-minutes: 150
     defaults:
       run:
         working-directory: shop
@@ -25,7 +35,13 @@ jobs:
         with:
           node-version: 22
       - run: npm run collect
+        env:
+          COLLECT_ONLY: ${{ inputs.only }}
+          COLLECT_LIMIT: ${{ inputs.limit }}
+          COLLECT_DEBUG: ${{ inputs.only != '' && '1' || '' }}
+          COLLECT_DRY_RUN: ${{ (inputs.only != '' || inputs.limit != '') && '1' || '' }}
       - name: Commit new prices
+        if: ${{ !inputs.only && !inputs.limit }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
