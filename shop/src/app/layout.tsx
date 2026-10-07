@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { ListLink } from "@/components/ListLink";
 import { RegisterServiceWorker } from "@/components/RegisterServiceWorker";
 import { SearchBox } from "@/components/SearchBox";
 import { APP_NAME } from "@/lib/data";
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <nav className="ml-auto flex gap-4 text-sm text-ink-2">
               <Link href="/search">Browse</Link>
               <Link href="/shops">Shops</Link>
+              <ListLink />
             </nav>
           </div>
         </header>

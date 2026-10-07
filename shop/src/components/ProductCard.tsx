@@ -1,38 +1,44 @@
 import Link from "next/link";
+import { AddToListButton } from "@/components/AddToListButton";
 import { categoryLabel, formatPrice, type Product } from "@/lib/data";
 
 export function ProductCard({ product, was }: { product: Product; was?: number }) {
   const inStockShops = product.offers.filter((o) => o.inStock).length;
   return (
-    <Link
-      href={`/product/${product.id}`}
-      className="flex flex-col rounded-xl border border-line bg-surface p-3 transition hover:border-brand"
-    >
-      <div className="mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-bg">
-        {product.image ? (
-          // Shop images come from many domains, so a plain img avoids per-domain config.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image} alt="" className="h-full w-full object-contain" loading="lazy" />
-        ) : (
-          <span className="text-xs text-ink-3">{categoryLabel(product.category)}</span>
-        )}
-      </div>
-      <p className="line-clamp-2 text-sm font-medium">{product.name}</p>
-      <div className="mt-auto pt-2">
-        <p className="flex flex-wrap items-baseline gap-x-2 text-lg font-bold">
-          {formatPrice(product.lowestPrice)}
-          {was !== undefined && (
-            <span className="text-sm font-normal text-ink-3 line-through">{formatPrice(was)}</span>
+    <div className="relative">
+      <Link
+        href={`/product/${product.id}`}
+        className="flex h-full flex-col rounded-xl border border-line bg-surface p-3 transition hover:border-brand"
+      >
+        <div className="mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-bg">
+          {product.image ? (
+            // Shop images come from many domains, so a plain img avoids per-domain config.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={product.image} alt="" className="h-full w-full object-contain" loading="lazy" />
+          ) : (
+            <span className="text-xs text-ink-3">{categoryLabel(product.category)}</span>
           )}
-        </p>
-        <p className="text-xs text-ink-2">
-          {product.offers.length === 1
-            ? "1 shop"
-            : `Cheapest of ${product.offers.length} shops`}
-          {inStockShops === 0 && " · out of stock"}
-        </p>
+        </div>
+        <p className="line-clamp-2 text-sm font-medium">{product.name}</p>
+        <div className="mt-auto pt-2">
+          <p className="flex flex-wrap items-baseline gap-x-2 text-lg font-bold">
+            {formatPrice(product.lowestPrice)}
+            {was !== undefined && (
+              <span className="text-sm font-normal text-ink-3 line-through">{formatPrice(was)}</span>
+            )}
+          </p>
+          <p className="text-xs text-ink-2">
+            {product.offers.length === 1
+              ? "1 shop"
+              : `Cheapest of ${product.offers.length} shops`}
+            {inStockShops === 0 && " · out of stock"}
+          </p>
+        </div>
+      </Link>
+      <div className="absolute right-2 top-2">
+        <AddToListButton id={product.id} listingIds={product.offers.map((o) => o.listingId)} compact />
       </div>
-    </Link>
+    </div>
   );
 }
 

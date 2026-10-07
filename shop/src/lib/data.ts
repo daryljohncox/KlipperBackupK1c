@@ -2,6 +2,12 @@ import productsJson from "../../data/products.json";
 import historyJson from "../../data/history.json";
 import statusJson from "../../data/status.json";
 import shopsJson from "../../collector/shops.json";
+import {
+  detectColour,
+  detectDiameter,
+  detectMaterial,
+  detectWeightGrams,
+} from "../../collector/normalize.mjs";
 
 export const APP_NAME = "3dPriceCompareNZ";
 
@@ -22,6 +28,7 @@ export type Product = {
   material: string | null;
   colour: string | null;
   weightGrams: number | null;
+  diameter: string | null;
   image: string | null;
   lowestPrice: number;
   offers: Offer[];
@@ -41,7 +48,22 @@ export const CATEGORIES = [
 ] as const;
 export type Category = (typeof CATEGORIES)[number]["id"];
 
-export const products = productsJson as unknown as Product[];
+// Re-read attributes from every shop's title, so detection improvements apply
+// without waiting for the next price collection.
+function withAttributes(p: Product): Product {
+  const titles = [p.name, ...p.offers.map((o) => o.title)];
+  const first = <T,>(detect: (t: string) => T | null) =>
+    titles.map(detect).find((v) => v !== null && v !== undefined) ?? null;
+  return {
+    ...p,
+    material: first(detectMaterial),
+    colour: first(detectColour),
+    weightGrams: first(detectWeightGrams),
+    diameter: first(detectDiameter),
+  };
+}
+
+export const products = (productsJson as unknown as Product[]).map(withAttributes);
 export const history = historyJson as unknown as Record<string, [string, number][]>;
 export const status = statusJson as unknown as Status;
 export const shops = shopsJson as Shop[];
@@ -59,29 +81,80 @@ export function getProduct(id: string) {
 
 export type Sort = "relevance" | "price" | "shops";
 
-export function search({
-  q = "",
-  category,
-  inStock = false,
-  sort = "relevance",
-}: {
+export type Filters = {
   q?: string;
   category?: string;
   inStock?: boolean;
-  sort?: Sort;
-}) {
-  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-  let results = products.filter((p) => {
-    if (category && p.category !== category) return false;
-    if (inStock && !p.offers.some((o) => o.inStock)) return false;
-    const text = [p.name, p.brand, p.material, p.colour, ...p.offers.map((o) => o.title)]
-      .join(" ")
-      .toLowerCase();
-    return words.every((w) => text.includes(w));
-  });
-  if (sort === "price") results = [...results].sort((a, b) => a.lowestPrice - b.lowestPrice);
-  if (sort === "shops") results = [...results].sort((a, b) => b.offers.length - a.offers.length);
+  brand?: string;
+  material?: string;
+  colour?: string;
+  weight?: string;
+  diameter?: string;
+};
+
+export const FACETS = [
+  { key: "brand", label: "Brand" },
+  { key: "material", label: "Type" },
+  { key: "colour", label: "Colour" },
+  { key: "weight", label: "Roll size" },
+  { key: "diameter", label: "Diameter" },
+] as const;
+export type FacetKey = (typeof FACETS)[number]["key"];
+
+function facetValue(p: Product, key: FacetKey): string | null {
+  if (key === "weight") return p.weightGrams ? String(p.weightGrams) : null;
+  return p[key];
+}
+
+export function facetLabel(key: FacetKey, value: string) {
+  if (key === "weight") {
+    const g = Number(value);
+    return g >= 1000 ? `${g / 1000} kg` : `${g} g`;
+  }
+  if (key === "diameter") return `${value} mm`;
+  if (key === "colour") return value[0].toUpperCase() + value.slice(1);
+  return value;
+}
+
+function matches(p: Product, f: Filters, skip?: FacetKey) {
+  if (f.category && p.category !== f.category) return false;
+  if (f.inStock && !p.offers.some((o) => o.inStock)) return false;
+  for (const { key } of FACETS) {
+    if (key === skip) continue;
+    const want = f[key];
+    if (want && facetValue(p, key) !== want) return false;
+  }
+  const words = (f.q ?? "").toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const text = [p.name, p.brand, p.material, p.colour, ...p.offers.map((o) => o.title)]
+    .join(" ")
+    .toLowerCase();
+  return words.every((w) => text.includes(w));
+}
+
+export function search(f: Filters & { sort?: Sort }) {
+  let results = products.filter((p) => matches(p, f));
+  if (f.sort === "price") results = [...results].sort((a, b) => a.lowestPrice - b.lowestPrice);
+  if (f.sort === "shops") results = [...results].sort((a, b) => b.offers.length - a.offers.length);
   return results;
+}
+
+// Options for each filter, counted against the other active filters.
+export function facetOptions(f: Filters) {
+  return FACETS.map(({ key, label }) => {
+    const counts = new Map<string, number>();
+    for (const p of products) {
+      if (!matches(p, f, key)) continue;
+      const v = facetValue(p, key);
+      if (v) counts.set(v, (counts.get(v) ?? 0) + 1);
+    }
+    const options = [...counts]
+      .sort((a, b) =>
+        key === "weight" || key === "diameter" ? Number(a[0]) - Number(b[0]) : b[1] - a[1] || a[0].localeCompare(b[0]),
+      )
+      .map(([value, count]) => ({ value, count, label: facetLabel(key, value) }));
+    return { key, label, options };
+  });
 }
 
 // Lowest price across all shops for each day we have data, for the chart.
