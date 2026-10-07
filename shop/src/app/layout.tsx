@@ -31,7 +31,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 pb-10 pt-4 text-xs text-ink-3">
           Prices in NZD including GST, collected daily from each shop&apos;s website. Always check
-          the final price on the shop&apos;s site before buying.
+          the final price on the shop&apos;s site before buying.{" "}
+          <Link href="/privacy" className="underline">
+            Privacy policy
+          </Link>
         </footer>
       </body>
     </html>
