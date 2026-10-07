@@ -20,7 +20,9 @@ export default function ShopsPage() {
               ? "Waiting for first collection"
               : s.ok
                 ? `${s.listings} products`
-                : "Couldn't read prices last time";
+                : s.error?.includes("HTTP 403")
+                  ? "Shop blocks price checks"
+                  : "Couldn't read prices last time";
           return (
             <li key={shop.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <a href={shop.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
