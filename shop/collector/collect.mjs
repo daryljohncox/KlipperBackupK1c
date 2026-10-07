@@ -126,11 +126,13 @@ async function readSitemap(shop) {
   const raw = [];
   const errors = [];
   const stopAt = Date.now() + MAX_SHOP_MINUTES * 60_000;
+  let debugged = false;
   for (const url of [...pages].slice(0, Math.min(MAX_PRODUCT_PAGES, LIMIT))) {
     try {
       const html = await getText(url);
-      const p = parseProductPage(html);
-      if (!p && DEBUG && errors.push("debug") === 1) {
+      const p = parseProductPage(html, { htmlPrice: shop.htmlPrice });
+      if (!p && DEBUG && !debugged) {
+        debugged = true;
         console.log(`[debug] ${shop.id} ${url} (${html.length} chars)`);
         for (const line of html.split("\n").filter((l) => /price|ld\+json|availab/i.test(l)).slice(0, 25)) {
           console.log(`[debug]   ${line.trim().slice(0, 300)}`);

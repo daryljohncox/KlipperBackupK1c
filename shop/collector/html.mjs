@@ -15,7 +15,7 @@ const decode = (s) =>
 // Returns { sitemaps, pages } listed in a sitemap or sitemap index.
 export function parseSitemap(xml) {
   const locs = (tag) =>
-    [...xml.matchAll(new RegExp(`<${tag}>[\\s\\S]*?<loc>\\s*([^<]+?)\\s*</loc>`, "g"))].map((m) => decode(m[1]));
+    [...xml.matchAll(new RegExp(`<${tag}>[\\s\\S]*?<loc>\\s*(?:<!\\[CDATA\\[)?\\s*([^<\\]]+?)\\s*(?:\\]\\]>)?\\s*</loc>`, "g"))].map((m) => decode(m[1]));
   return { sitemaps: locs("sitemap"), pages: locs("url") };
 }
 
@@ -107,7 +107,9 @@ const toPrice = (v) => {
 const inStockText = (v) => (v == null ? null : !/out ?of ?stock|outofstock|soldout|discontinued/i.test(String(v)));
 
 // Reads a product page. Returns { title, price, inStock, image } or null.
-export function parseProductPage(html) {
+// htmlPrice: also look for a visible "price" element, for shops that publish no
+// structured data (only safe on pages that are known to be product pages).
+export function parseProductPage(html, { htmlPrice = false } = {}) {
   let title = null;
   let price = null;
   let inStock = null;
@@ -133,6 +135,12 @@ export function parseProductPage(html) {
   price ??= toPrice(meta(html, "product:price:amount") ?? meta(html, "og:price:amount") ?? meta(html, "price"));
   inStock ??= inStockText(meta(html, "product:availability") ?? meta(html, "og:availability") ?? meta(html, "availability")) ?? true;
   image ??= meta(html, "og:image");
+  if (htmlPrice) {
+    const m = html.match(/class=["'][^"']*\bprice(?:-new)?\b[^"']*["'][^>]*>\s*(?:<[^>]+>\s*)*\$\s?([\d,]+(?:\.\d{2})?)/i);
+    price ??= m ? toPrice(m[1]) : null;
+    const stock = html.match(/Availability:\s*(?:<[^>]+>\s*)*([^<]+)/i);
+    if (stock) inStock = inStockText(stock[1]);
+  }
 
   if (!title || !price) return null;
   return { title, price, inStock, image };

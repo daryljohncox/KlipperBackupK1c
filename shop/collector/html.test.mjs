@@ -44,3 +44,14 @@ test("parseProductPage falls back to meta tags", () => {
   assert.deepEqual(parseProductPage(html), { title: "NextShapes PETG-HF 1kg Refill", price: 19.9, inStock: false, image: "https://s.nz/b.jpg" });
   assert.equal(parseProductPage(`<title>About us</title>`), null);
 });
+
+test("parseSitemap handles CDATA", () => {
+  assert.deepEqual(parseSitemap(`<urlset><url><loc><![CDATA[https://s.nz/p/1-pla.html]]></loc></url></urlset>`).pages, ["https://s.nz/p/1-pla.html"]);
+});
+
+test("parseProductPage can read a visible price", () => {
+  const html = `<title>Bambu PLA Basic 1kg</title><ul><li>Availability: Out Of Stock</li></ul>
+    <p class="price">  <span class="price-new">$2,085.00</span> <span class="price-old">$2,599.00</span></p>`;
+  assert.equal(parseProductPage(html), null);
+  assert.deepEqual(parseProductPage(html, { htmlPrice: true }), { title: "Bambu PLA Basic 1kg", price: 2085, inStock: false, image: null });
+});
