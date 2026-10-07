@@ -1,24 +1,24 @@
 {
-  "collectedAt": "2026-10-07T01:49:06.980Z",
+  "collectedAt": "2026-10-07T21:49:27.172Z",
   "sample": false,
   "shops": [
     {
       "id": "kiwifil",
       "ok": true,
       "platform": "shopify",
-      "listings": 171
+      "listings": 173
     },
     {
       "id": "formtech",
       "ok": true,
       "platform": "shopify",
-      "listings": 793
+      "listings": 792
     },
     {
       "id": "bits4bots",
       "ok": true,
       "platform": "shopify",
-      "listings": 1277
+      "listings": 1269
     },
     {
       "id": "makershop",
