@@ -1,0 +1,17 @@
+[
+  { "id": "kiwifil", "name": "KiwiFil", "url": "https://kiwifil.shop", "platform": "shopify" },
+  { "id": "formtech", "name": "Formtech", "url": "https://formtech.co.nz", "platform": "shopify" },
+  { "id": "bits4bots", "name": "Bits4Bots", "url": "https://bits4bots.co.nz", "platform": "shopify" },
+  { "id": "makershop", "name": "Makershop", "url": "https://makershop.co.nz", "platform": "auto" },
+  { "id": "marvle3d", "name": "Marvle3D", "url": "https://marvle3d.co.nz", "platform": "auto" },
+  { "id": "3dshop", "name": "3D Shop", "url": "https://3dshop.co.nz", "platform": "auto" },
+  { "id": "mindkits", "name": "MindKits", "url": "https://mindkits.co.nz", "platform": "auto" },
+  { "id": "3dmax", "name": "3D Max", "url": "https://3dmax.co.nz", "platform": "auto" },
+  { "id": "wondershop", "name": "Wondershop", "url": "https://wondershop.nz", "platform": "auto" },
+  { "id": "3dea", "name": "3DEA", "url": "https://3dea.co.nz", "platform": "auto" },
+  { "id": "bambulab", "name": "Bambu Lab Store", "url": "https://store.bambulab.com", "platform": "custom" },
+  { "id": "creality", "name": "Creality Store", "url": "https://store.creality.com", "platform": "custom" },
+  { "id": "pbtech", "name": "PB Tech", "url": "https://www.pbtech.co.nz", "platform": "custom" },
+  { "id": "jaycar", "name": "Jaycar", "url": "https://www.jaycar.co.nz", "platform": "custom" },
+  { "id": "jbhifi", "name": "JB Hi-Fi", "url": "https://www.jbhifi.co.nz", "platform": "custom" }
+]
