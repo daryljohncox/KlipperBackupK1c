@@ -38,6 +38,7 @@ jobs:
         env:
           COLLECT_ONLY: ${{ inputs.only }}
           COLLECT_LIMIT: ${{ inputs.limit }}
+          COLLECT_DEBUG: ${{ inputs.only != '' && '1' || '' }}
           COLLECT_DRY_RUN: ${{ (inputs.only != '' || inputs.limit != '') && '1' || '' }}
       - name: Commit new prices
         if: ${{ !inputs.only && !inputs.limit }}

@@ -17,6 +17,7 @@ const MAX_SHOP_MINUTES = 90;
 const ONLY = process.env.COLLECT_ONLY?.split(",").filter(Boolean);
 const LIMIT = Number(process.env.COLLECT_LIMIT) || Infinity;
 const DRY_RUN = Boolean(process.env.COLLECT_DRY_RUN);
+const DEBUG = Boolean(process.env.COLLECT_DEBUG);
 
 async function getJson(url) {
   const res = await fetch(url, {
@@ -93,6 +94,7 @@ async function readWooCommerce(shop) {
 // product details each page publishes for Google. Follows robots.txt.
 async function readSitemap(shop) {
   const origin = new URL(shop.url).origin;
+  const host = (u) => new URL(u).hostname.replace(/^www\./, "");
   let robots = { sitemaps: [], disallow: [], crawlDelay: 0 };
   try {
     robots = parseRobots(await getText(`${origin}/robots.txt`));
@@ -110,7 +112,7 @@ async function readSitemap(shop) {
     const { sitemaps, pages: found } = parseSitemap(await getText(pending[i]));
     pending.push(...sitemaps.filter((u) => !followSitemap || followSitemap.test(u)));
     for (const url of found) {
-      if (new URL(url).origin !== origin) continue;
+      if (host(url) !== host(origin)) continue;
       if (productUrl && !productUrl.test(url)) continue;
       if (include && !include.test(url)) continue;
       if (!isAllowed(url, robots.disallow)) continue;
@@ -118,6 +120,7 @@ async function readSitemap(shop) {
     }
     await sleep(delay);
   }
+  if (DEBUG) console.log(`[debug] ${shop.id}: ${pages.size} pages from ${pending.length} sitemaps, e.g. ${[...pages].slice(0, 5).join(" ")} / sitemaps ${pending.slice(0, 5).join(" ")}`);
   if (!pages.size) throw new Error("No product pages found in the sitemap");
 
   const raw = [];
@@ -125,7 +128,14 @@ async function readSitemap(shop) {
   const stopAt = Date.now() + MAX_SHOP_MINUTES * 60_000;
   for (const url of [...pages].slice(0, Math.min(MAX_PRODUCT_PAGES, LIMIT))) {
     try {
-      const p = parseProductPage(await getText(url));
+      const html = await getText(url);
+      const p = parseProductPage(html);
+      if (!p && DEBUG && errors.push("debug") === 1) {
+        console.log(`[debug] ${shop.id} ${url} (${html.length} chars)`);
+        for (const line of html.split("\n").filter((l) => /price|ld\+json|availab/i.test(l)).slice(0, 25)) {
+          console.log(`[debug]   ${line.trim().slice(0, 300)}`);
+        }
+      }
       if (p) raw.push({ id: `${shop.id}:${hashId(url)}`, vendor: null, productType: "", url, ...p });
     } catch (e) {
       errors.push(e.message);
