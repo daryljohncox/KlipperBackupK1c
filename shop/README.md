@@ -1,4 +1,4 @@
-# PrintPrice NZ
+# 3dPriceCompareNZ
 
 A free price comparison app for 3D printers, filament, resin and parts across New Zealand shops, in the style of Grocer. It does not sell anything: each price links to the shop's own website.
 

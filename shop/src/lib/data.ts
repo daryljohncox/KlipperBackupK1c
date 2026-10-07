@@ -3,7 +3,7 @@ import historyJson from "../../data/history.json";
 import statusJson from "../../data/status.json";
 import shopsJson from "../../collector/shops.json";
 
-export const APP_NAME = "PrintPrice NZ";
+export const APP_NAME = "3dPriceCompareNZ";
 
 export type Offer = {
   listingId: string;

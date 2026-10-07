@@ -7,7 +7,7 @@ import { categorize, detectBrand, matchKey, groupProducts, updateHistory } from 
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(here, "..", "data");
-const USER_AGENT = "PrintPriceNZ/0.1 (price comparison; +https://github.com/daryljohncox/klipperbackupk1c)";
+const USER_AGENT = "3dPriceCompareNZ/0.1 (price comparison; +https://github.com/daryljohncox/klipperbackupk1c)";
 const MAX_PAGES = 40;
 
 async function getJson(url) {
