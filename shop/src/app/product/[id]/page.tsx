@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddToListButton } from "@/components/AddToListButton";
 import { PriceChart } from "@/components/PriceChart";
 import { SampleBanner } from "@/components/SampleBanner";
 import { categoryLabel, formatPrice, getProduct, lowestPriceHistory, shopName } from "@/lib/data";
@@ -13,6 +14,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     ["Brand", product.brand],
     ["Material", product.material],
     ["Colour", product.colour && product.colour[0].toUpperCase() + product.colour.slice(1)],
+    ["Diameter", product.diameter ? `${product.diameter} mm` : null],
     ["Weight", product.weightGrams ? (product.weightGrams >= 1000 ? `${product.weightGrams / 1000} kg` : `${product.weightGrams} g`) : null],
   ].filter(([, v]) => v);
 
@@ -39,6 +41,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <p className="text-sm text-ink-2">
             {cheapest.inStock ? `Cheapest at ${shopName(cheapest.shopId)}` : "Out of stock everywhere"}
           </p>
+          <div className="mt-4">
+            <AddToListButton id={product.id} listingIds={product.offers.map((o) => o.listingId)} />
+          </div>
           {specs.length > 0 && (
             <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
               {specs.map(([k, v]) => (

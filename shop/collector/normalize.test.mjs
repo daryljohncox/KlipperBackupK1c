@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  categorize, detectBrand, detectMaterial, detectWeightGrams, detectColour,
+  categorize, detectBrand, detectMaterial, detectDiameter, detectWeightGrams, detectColour,
   matchKey, groupProducts, updateHistory,
 } from "./normalize.mjs";
 
@@ -22,6 +22,14 @@ test("attribute detection", () => {
   assert.equal(detectMaterial("Polymaker PLA-CF Black 500g"), "PLA-CF");
   assert.equal(detectMaterial("eSun PLA+ White 1kg"), "PLA+");
   assert.equal(detectMaterial("Bambu Lab PETG HF Black 1kg"), "PETG");
+  assert.equal(detectMaterial("eSun ePETG-CF (Carbon Fiber) Filament - Dark Blue / 1.75mm / 1kg"), "PETG-CF");
+  assert.equal(detectMaterial("eSun ePLA-Matte 1.75mm Filament 1kg - Aqua"), "Matte PLA");
+  assert.equal(detectMaterial("eSun Silk-PLA 1.75mm Filament 1kg - White"), "Silk PLA");
+  assert.equal(detectMaterial("PETG Carbon Fibre 1kg"), "PETG-CF");
+  assert.equal(detectDiameter("eSun PLA+ 1.75mm White 1kg"), "1.75");
+  assert.equal(detectDiameter("Ultimaker PLA 2.85 mm 750g"), "2.85");
+  assert.equal(detectDiameter("PLA 3mm 1kg"), "2.85");
+  assert.equal(detectDiameter("PLA 1kg"), null);
   assert.equal(detectWeightGrams("Polymaker PLA 1kg"), 1000);
   assert.equal(detectWeightGrams("Polymaker PLA 750 g"), 750);
   assert.equal(detectColour("eSun PLA+ Gray 1kg"), "grey");

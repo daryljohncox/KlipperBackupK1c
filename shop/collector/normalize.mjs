@@ -18,6 +18,8 @@ const COLOURS = [
   "black", "white", "grey", "gray", "silver", "red", "orange", "yellow", "green", "blue", "purple",
   "pink", "brown", "beige", "gold", "bronze", "copper", "transparent", "clear", "natural", "cyan",
   "magenta", "teal", "navy", "olive", "ivory", "sandstone", "marble", "rainbow", "glow",
+  "aqua", "mint", "lime", "violet", "cream", "tan", "wood", "coral", "turquoise", "lavender",
+  "maroon", "burgundy", "charcoal", "khaki", "peach", "skin", "multicolour", "multicolor",
 ];
 
 export const CATEGORIES = ["filament", "resin", "printer", "parts", "post-processing", "accessories"];
@@ -56,11 +58,24 @@ export function detectBrand(title, vendor, shopName) {
 }
 
 export function detectMaterial(title) {
+  const t = title
+    // eSun style names: ePLA, ePETG-CF.
+    .replace(/\be(PLA|PETG|ABS|ASA|TPU|PC|PA)/g, "$1")
+    // "PLA-Matte" / "PLA Silk" read the same as "Matte PLA" / "Silk PLA".
+    .replace(/\bPLA[ -](Matte|Silk)\b/gi, "$1 PLA")
+    // "PETG (Carbon Fiber)" reads as "PETG-CF".
+    .replace(/\b(PLA|PETG|PA|PET)\b(?=.*carbon fib(er|re))/i, "$1-CF");
   for (const m of MATERIALS) {
     const pattern = new RegExp(`(^|[^a-z])${m.replace(/[+]/g, "\\+").replace(/ /g, "[ -]?")}($|[^a-z])`, "i");
-    if (pattern.test(title)) return m;
+    if (pattern.test(t)) return m;
   }
   return null;
+}
+
+export function detectDiameter(title) {
+  const m = title.match(/\b(1\.75|2\.85|3(?:\.0+)?)\s?mm\b/i);
+  if (!m) return null;
+  return m[1].startsWith("3") ? "2.85" : m[1];
 }
 
 export function detectWeightGrams(title) {
@@ -74,7 +89,8 @@ export function detectColour(title) {
   const t = title.toLowerCase();
   const found = COLOURS.find((c) => new RegExp(`\\b${c}\\b`).test(t));
   if (!found) return null;
-  return found === "gray" ? "grey" : found === "clear" ? "transparent" : found;
+  const aliases = { gray: "grey", clear: "transparent", multicolor: "multicolour" };
+  return aliases[found] ?? found;
 }
 
 const STOPWORDS = new Set(["the", "and", "for", "with", "a", "of", "in", "nz", "new", "-", "–", "|"]);
@@ -107,6 +123,7 @@ export function attributes(title) {
     material: detectMaterial(title),
     colour: detectColour(title),
     weightGrams: detectWeightGrams(title),
+    diameter: detectDiameter(title),
   };
 }
 
