@@ -12,15 +12,21 @@ export default function ShopsPage() {
       <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
         {shops.map((shop) => {
           const s = byId.get(shop.id);
-          const state = !s
-            ? shop.platform === "custom" ? "Coming soon" : "Waiting for first collection"
-            : s.ok ? `${s.listings} products` : "Couldn't read prices last time";
+          const comingSoon = shop.platform === "custom";
+          const failed = !comingSoon && s && !s.ok;
+          const state = comingSoon
+            ? "Coming soon"
+            : !s
+              ? "Waiting for first collection"
+              : s.ok
+                ? `${s.listings} products`
+                : "Couldn't read prices last time";
           return (
             <li key={shop.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <a href={shop.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
                 {shop.name}
               </a>
-              <span className={s && !s.ok ? "text-sm text-deal" : "text-sm text-ink-2"}>{state}</span>
+              <span className={failed ? "text-sm text-deal" : "text-sm text-ink-2"}>{state}</span>
             </li>
           );
         })}
