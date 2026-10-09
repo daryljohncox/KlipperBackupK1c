@@ -1,12 +1,12 @@
 {
-  "collectedAt": "2026-10-08T21:52:47.364Z",
+  "collectedAt": "2026-10-09T21:31:05.872Z",
   "sample": false,
   "shops": [
     {
       "id": "kiwifil",
       "ok": true,
       "platform": "shopify",
-      "listings": 173
+      "listings": 175
     },
     {
       "id": "formtech",
